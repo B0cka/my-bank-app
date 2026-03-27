@@ -1,0 +1,17 @@
+account:
+  service:
+    path:
+      "http://accounts-service"
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: cash-id
+            client-secret: kFbQb0zqaUYYxxLmVnrRCppBqonM4Pag
+            authorization-grant-type: client_credentials
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/bank-realm

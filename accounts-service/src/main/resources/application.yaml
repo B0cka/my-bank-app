@@ -1,0 +1,12 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/bank-realm
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+
+server.port: 8090

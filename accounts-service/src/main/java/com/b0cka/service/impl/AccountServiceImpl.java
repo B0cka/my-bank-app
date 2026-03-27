@@ -1,0 +1,66 @@
+package com.b0cka.service.impl;
+
+import com.b0cka.component.AccountMapper;
+import com.b0cka.dto.AccountDto;
+import com.b0cka.dto.CashAction;
+import com.b0cka.dto.UpdateAccountDto;
+import com.b0cka.entity.Account;
+import com.b0cka.ex.NotFoundException;
+import com.b0cka.ex.YoungUserException;
+import com.b0cka.repository.AccountRepository;
+import com.b0cka.service.AccountService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
+@Service
+@RequiredArgsConstructor
+public class AccountServiceImpl implements AccountService {
+
+    private final AccountRepository accountRepository;
+
+    @Override
+    public AccountDto updateCurrentAccount(UpdateAccountDto updateAccountDto) {
+
+        if ((ChronoUnit.YEARS.between(updateAccountDto.getBirthday(), LocalDate.now()) < 18)) {
+            throw new YoungUserException("Возраст юзера не соответствует требованиям банка");
+        }
+
+        Account account = accountRepository.findByLogin(currentUser()).orElseGet(() ->
+                Account.builder()
+                        .name("Client" + (Math.random() * 900000) + 100000)
+                        .login(currentUser())
+                        .balance(0L)
+                        .birthday(LocalDate.of(2000, 12, 1))
+                        .build());
+
+        account.setName(updateAccountDto.getName());
+        account.setBirthday(updateAccountDto.getBirthday());
+
+        accountRepository.save(account);
+
+        return AccountMapper.toDto(account);
+    }
+
+    @Override
+    public AccountDto getCurrentAccount() {
+        Account account = accountRepository.findByLogin(currentUser())
+                .orElseGet(() ->
+                        accountRepository.save(Account.builder()
+                                .name("Client" + (Math.random() * 900000) + 100000)
+                                .login(currentUser())
+                                .balance(0L)
+                                .birthday(LocalDate.of(2000, 12, 1))
+                                .build()));
+
+        return AccountMapper.toDto(account);
+    }
+
+    private String currentUser() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+}
