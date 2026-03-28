@@ -16,5 +16,5 @@ spring:
             provider: keycloak
             client-id: front-ui
             client-secret: 7jFtkFDPElGOxRzfRUWJTsT8q2XheMnS
-            redirect-uri: "/"
+            redirect-uri: "http://localhost:8180/accounts"
             scope: openid, profile, email

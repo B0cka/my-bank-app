@@ -13,6 +13,7 @@
         <module>spring-cloud-gateway</module>
         <module>accounts-service</module>
         <module>cash-service</module>
+        <module>transfer-service</module>
     </modules>
 
     <parent>

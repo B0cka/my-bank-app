@@ -7,6 +7,7 @@ import com.b0cka.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,15 +29,17 @@ public class AccountController {
         return accountService.getCurrentAccount();
     }
 
+    @Transactional
     @PostMapping("/internal/deposit")
-    @PreAuthorize("hasRole('SERVICE')")
+    @PreAuthorize("hasRole('SERVICE') or hasRole('TRANSFER_WRITE')")
     public void deposit(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
         accountService.deposit(accountBalanceOperationRequest);
     }
 
+    @Transactional
     @PostMapping("/internal/withdraw")
-    @PreAuthorize("hasRole('SERVICE')")
+    @PreAuthorize("hasRole('SERVICE') or hasRole('TRANSFER_WRITE')")
     public void withdraw(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
         accountService.withdraw(accountBalanceOperationRequest);

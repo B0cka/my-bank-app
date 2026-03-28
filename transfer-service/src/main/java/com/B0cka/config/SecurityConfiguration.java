@@ -1,4 +1,4 @@
-package ru.yandex.configuration;
+package com.B0cka.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
