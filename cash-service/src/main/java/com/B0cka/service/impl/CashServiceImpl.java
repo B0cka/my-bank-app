@@ -6,7 +6,10 @@ import com.B0cka.ex.InvalidAmount;
 import com.B0cka.ex.InvalidAction;
 import com.B0cka.service.CashService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +37,18 @@ public class CashServiceImpl implements CashService {
     }
 
     private String currentUser() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+            Jwt jwt = jwtAuthenticationToken.getToken();
+            String username = jwt.getClaimAsString("preferred_username");
+
+            if (username != null && !username.isBlank()) {
+                return username;
+            }
+        }
+
+        throw new IllegalStateException("Не удалось определить логин текущего пользователя");
     }
 
 

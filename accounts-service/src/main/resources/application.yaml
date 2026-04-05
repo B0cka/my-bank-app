@@ -1,14 +1,33 @@
+server:
+  port: 8090
+
 spring:
   application:
     name: accounts-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/bank-realm
+
   cloud:
     consul:
       host: localhost
       port: 8500
 
-server.port: 8090
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/bank-realm
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5444/bank?ssl=false&sslmode=disable
+    username: bank
+    password: bank
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -29,9 +31,13 @@ public class AccountController {
         return accountService.getCurrentAccount();
     }
 
+    @GetMapping("/others")
+    public List<AccountDto> getOtherAccounts() {
+        return accountService.getOtherAccounts();
+    }
+
     @Transactional
     @PostMapping("/internal/deposit")
-    @PreAuthorize("hasRole('SERVICE') or hasRole('TRANSFER_WRITE')")
     public void deposit(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
         accountService.deposit(accountBalanceOperationRequest);
@@ -39,7 +45,6 @@ public class AccountController {
 
     @Transactional
     @PostMapping("/internal/withdraw")
-    @PreAuthorize("hasRole('SERVICE') or hasRole('TRANSFER_WRITE')")
     public void withdraw(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
         accountService.withdraw(accountBalanceOperationRequest);

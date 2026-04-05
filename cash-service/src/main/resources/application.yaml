@@ -19,10 +19,14 @@ spring:
         registration:
           keycloak:
             client-id: cash-id
-            client-secret: kFbQb0zqaUYYxxLmVnrRCppBqonM4Pag
+            client-secret: GbMK0I9cl5t89lod3Xf47ikldUotRspQ
             authorization-grant-type: client_credentials
         provider:
           keycloak:
             issuer-uri: http://localhost:8080/realms/bank-realm
 server:
   port: 8900
+
+notification:
+  service:
+    path: http://notifications-service
