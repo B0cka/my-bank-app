@@ -14,6 +14,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.B0cka</groupId>
+            <artifactId>common-clients</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-discovery</artifactId>
         </dependency>
