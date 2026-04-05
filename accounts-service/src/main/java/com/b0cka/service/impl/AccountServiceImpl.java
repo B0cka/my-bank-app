@@ -102,15 +102,8 @@ public class AccountServiceImpl implements AccountService {
 
     private String currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("AUTH CLASS = " + authentication.getClass());
-        System.out.println("AUTH NAME = " + authentication.getName());
-        System.out.println("AUTHORITIES = " + authentication.getAuthorities());
-
         if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
             Jwt jwt = jwtAuthenticationToken.getToken();
-            System.out.println("JWT preferred_username = " + jwt.getClaimAsString("preferred_username"));
-            System.out.println("JWT sub = " + jwt.getSubject());
-
             String username = jwt.getClaimAsString("preferred_username");
             if (username != null && !username.isBlank()) {
                 return username;
