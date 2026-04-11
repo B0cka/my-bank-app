@@ -1,0 +1,39 @@
+server:
+  port: 8700
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+
+    gateway:
+      routes:
+        - id: accounts-service-route
+          uri: lb://accounts-service
+          predicates:
+            - Path=/accounts/**
+
+        - id: cash-service-route
+          uri: lb://cash-service
+          predicates:
+            - Path=/cash/**
+
+        - id: transfer-service-route
+          uri: lb://transfer-service
+          predicates:
+            - Path=/transfer/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/bank-realm
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

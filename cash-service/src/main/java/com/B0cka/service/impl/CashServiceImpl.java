@@ -1,12 +1,17 @@
 package com.B0cka.service.impl;
 
 import com.B0cka.clients.AccountsClient;
+import com.B0cka.clients.NotificationsClient;
 import com.B0cka.dto.CashAction;
-import com.B0cka.ex.InvalidAmount;
+import com.B0cka.dto.NotificationRequest;
 import com.B0cka.ex.InvalidAction;
+import com.B0cka.ex.InvalidAmount;
 import com.B0cka.service.CashService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,19 +19,31 @@ import org.springframework.stereotype.Service;
 public class CashServiceImpl implements CashService {
 
     private final AccountsClient accountsClient;
+    private final NotificationsClient notificationsClient;
 
+    @Override
     public String performCashOperation(CashAction cashAction, Long sum) {
 
-        if(sum <= 0){
+        if (sum <= 0) {
             throw new InvalidAmount("Сумма должна быть больше нуля!");
         }
 
-        if(cashAction == CashAction.DEPOSIT){
-            accountsClient.deposit(currentUser(), sum);
+        String login = currentUser();
 
-        }else if (cashAction == CashAction.WITHDRAW){
-            accountsClient.withdraw(currentUser(), sum);
-        }else{
+        if (cashAction == CashAction.DEPOSIT) {
+            accountsClient.deposit(login, sum);
+
+            notificationsClient.sendNotification(
+                    new NotificationRequest(login, "Счет пополнен на " + sum)
+            );
+
+        } else if (cashAction == CashAction.WITHDRAW) {
+            accountsClient.withdraw(login, sum);
+
+            notificationsClient.sendNotification(
+                    new NotificationRequest(login, "Со счета снято " + sum)
+            );
+        } else {
             throw new InvalidAction("Неизвестное действие");
         }
 
@@ -34,8 +51,17 @@ public class CashServiceImpl implements CashService {
     }
 
     private String currentUser() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+            Jwt jwt = jwtAuthenticationToken.getToken();
+            String username = jwt.getClaimAsString("preferred_username");
+
+            if (username != null && !username.isBlank()) {
+                return username;
+            }
+        }
+
+        throw new IllegalStateException("Не удалось определить логин текущего пользователя");
     }
-
-
 }

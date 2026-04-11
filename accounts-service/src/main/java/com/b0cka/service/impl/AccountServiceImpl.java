@@ -12,17 +12,31 @@ import com.b0cka.ex.YoungUserException;
 import com.b0cka.repository.AccountRepository;
 import com.b0cka.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+
+    @Override
+    public List<AccountDto> getOtherAccounts() {
+        String currentLogin = currentUser();
+
+        return accountRepository.findAll().stream()
+                .filter(account -> !account.getLogin().equals(currentLogin))
+                .map(AccountMapper::toDto)
+                .toList();
+    }
 
     @Override
     public AccountDto updateCurrentAccount(UpdateAccountDto updateAccountDto) {
@@ -87,7 +101,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private String currentUser() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+            Jwt jwt = jwtAuthenticationToken.getToken();
+            String username = jwt.getClaimAsString("preferred_username");
+            if (username != null && !username.isBlank()) {
+                return username;
+            }
+        }
+
+        return authentication.getName();
     }
 
 }

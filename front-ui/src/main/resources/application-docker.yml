@@ -1,0 +1,21 @@
+server:
+  port: 8180
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/bank-realm
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: front-ui
+
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile, email
+
+gateway:
+  url: http://api-gateway:8700

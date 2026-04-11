@@ -9,11 +9,13 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>my-bank-front-app-skeleton</module>
-        <module>spring-cloud-gateway</module>
+        <module>front-ui</module>
+        <module>api-gateway</module>
         <module>accounts-service</module>
         <module>cash-service</module>
         <module>transfer-service</module>
+        <module>notifications-service</module>
+        <module>common-clients</module>
     </modules>
 
     <parent>

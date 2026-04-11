@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: cash-service
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/bank-realm
+      client:
+        registration:
+          keycloak:
+            client-id: cash-id
+            client-secret: GbMK0I9cl5t89lod3Xf47ikldUotRspQ
+            authorization-grant-type: client_credentials
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/bank-realm
+
+account:
+  service:
+    path: http://accounts-service
+
+notification:
+  service:
+    path: http://notifications-service
+
+server:
+  port: 8900

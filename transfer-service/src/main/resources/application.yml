@@ -26,3 +26,7 @@ server:
 account:
   service:
     path: http://accounts-service
+
+notification:
+  service:
+    path: http://notifications-service

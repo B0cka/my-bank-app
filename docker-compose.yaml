@@ -1,7 +1,108 @@
 services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: bank
+      POSTGRES_USER: bank
+      POSTGRES_PASSWORD: bank
+    ports:
+      - "5444:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   consul:
     image: consul:1.15.4
     container_name: consul
     command: agent -dev -client=0.0.0.0
     ports:
       - "8500:8500"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.3
+    container_name: keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./infra/keycloak/realm-export:/opt/keycloak/data/import
+    depends_on:
+      - postgres
+
+  accounts-service:
+    build: ./accounts-service
+    container_name: accounts-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8090:8090"
+    depends_on:
+      - consul
+      - keycloak
+      - postgres
+
+  cash-service:
+    build: ./cash-service
+    container_name: cash-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8900:8900"
+    depends_on:
+      - consul
+      - keycloak
+      - accounts-service
+
+  transfer-service:
+    build: ./transfer-service
+    container_name: transfer-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "9800:9800"
+    depends_on:
+      - consul
+      - keycloak
+      - accounts-service
+
+  notifications-service:
+    build: ./notifications-service
+    container_name: notifications-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "9900:9900"
+    depends_on:
+      - consul
+      - keycloak
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8700:8700"
+    depends_on:
+      - consul
+      - keycloak
+      - accounts-service
+      - cash-service
+      - transfer-service
+
+  front-ui:
+    build: ./front-ui
+    container_name: front-ui
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8180:8180"
+    depends_on:
+      - keycloak
+      - api-gateway
+
+volumes:
+  postgres_data:
