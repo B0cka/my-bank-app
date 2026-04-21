@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transfer-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transfer-service
+  template:
+    metadata:
+      labels:
+        app: transfer-service
+    spec:
+      containers:
+        - name: transfer-service
+
+          image: my-bank-app-transfer-service:v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9800
+          env:
+
+            - name: APP_SECURITY_OAUTH2_ISSUER_URI
+              valueFrom: { configMapKeyRef: { name: transfer-config, key: APP_SECURITY_OAUTH2_ISSUER_URI } }
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom: { configMapKeyRef: { name: transfer-config, key: KEYCLOAK_CLIENT_ID } }
+            - name: ACCOUNT_SERVICE_PATH
+              valueFrom: { configMapKeyRef: { name: transfer-config, key: ACCOUNT_SERVICE_PATH } }
+            - name: NOTIFICATION_SERVICE_PATH
+              valueFrom: { configMapKeyRef: { name: transfer-config, key: NOTIFICATION_SERVICE_PATH } }
+            - name: SPRING_PROFILES_ACTIVE
+              value: "docker"
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: transfer-secret
+                  key: KEYCLOAK_CLIENT_SECRET
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9800
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9800
+            initialDelaySeconds: 25

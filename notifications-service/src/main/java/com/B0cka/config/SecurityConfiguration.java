@@ -10,11 +10,13 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/actuator/health").permitAll()
-                        .anyRequest().authenticated()
+    SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
+        return security
+                .authorizeHttpRequests(requests ->
+                        requests
+                                .requestMatchers("/actuator/health/**").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
+                                .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(customizer -> customizer
                         .jwt(jwtCustomizer -> {

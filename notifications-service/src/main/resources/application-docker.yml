@@ -1,15 +1,18 @@
 spring:
   application:
     name: notifications-service
-  cloud:
-    consul:
-      host: consul
-      port: 8500
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/bank-realm
+          issuer-uri: ${APP_SECURITY_OAUTH2_ISSUER_URI}
 
 server:
   port: 9900
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

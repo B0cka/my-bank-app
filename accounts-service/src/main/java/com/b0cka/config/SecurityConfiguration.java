@@ -2,6 +2,7 @@ package com.b0cka.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,13 +16,14 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
+@Profile("!db-migration")
 public class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security
                 .authorizeHttpRequests(requests ->
-                        requests.requestMatchers("/actuator/health").permitAll()
+                        requests.requestMatchers("/actuator/health/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(customizer -> customizer
                         .jwt(jwtCustomizer -> {

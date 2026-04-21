@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cash-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cash-service
+  template:
+    metadata:
+      labels:
+        app: cash-service
+    spec:
+      containers:
+        - name: cash-service
+          image: my-bank-app-cash-service:v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8900
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "docker"
+            - name: APP_SECURITY_OAUTH2_ISSUER_URI
+              valueFrom: { configMapKeyRef: { name: cash-config, key: APP_SECURITY_OAUTH2_ISSUER_URI } }
+            - name: KEYLOACK_CLIENT_ID
+              valueFrom: { configMapKeyRef: { name: cash-config, key: KEYLOACK_CLIENT_ID } }
+            - name: ACCOUNT_SERVICE_PATH
+              valueFrom: { configMapKeyRef: { name: cash-config, key: ACCOUNT_SERVICE_PATH } }
+            - name: NOTIFICATION_SERVICE_PATH
+              valueFrom: { configMapKeyRef: { name: cash-config, key: NOTIFICATION_SERVICE_PATH } }
+
+            - name: KEYLOACK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cash-secret
+                  key: KEYLOACK_CLIENT_SECRET
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8900
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8900
+            initialDelaySeconds: 35

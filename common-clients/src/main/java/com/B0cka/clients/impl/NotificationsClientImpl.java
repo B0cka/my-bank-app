@@ -12,11 +12,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-@RequiredArgsConstructor
 public class NotificationsClientImpl implements NotificationsClient {
 
     private final RestClient.Builder restClientBuilder;
     private final OAuth2AuthorizedClientManager authorizedClientManager;
+
+    public NotificationsClientImpl(RestClient.Builder restClientBuilder, OAuth2AuthorizedClientManager authorizedClientManager) {
+        this.restClientBuilder = restClientBuilder;
+        this.authorizedClientManager = authorizedClientManager;
+    }
 
     @Value("${notification.service.path}")
     private String notificationsServicePath;

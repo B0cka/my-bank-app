@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+
+  name: cash-service
+spec:
+  type: ClusterIP
+
+  selector:
+    app: cash-service
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8900
+      targetPort: 8900
