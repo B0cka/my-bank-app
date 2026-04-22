@@ -5,4 +5,4 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/bank?ssl=false&sslmode=disable"
 
-  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8080/realms/bank-realm"
+  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"

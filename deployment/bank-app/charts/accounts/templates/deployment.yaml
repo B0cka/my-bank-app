@@ -17,7 +17,7 @@ spec:
     spec:
       initContainers:
         - name: db-migrator
-          image: my-bank-app-accounts-service:latest
+          image: "{{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}"
           imagePullPolicy: Never
           env:
 

@@ -4,7 +4,7 @@ metadata:
   name: transfer-config
 data:
 
-  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8080/realms/bank-realm"
+  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"
   KEYCLOAK_CLIENT_ID: "transfer-id"
   ACCOUNT_SERVICE_PATH: "http://accounts-service:8090"
   NOTIFICATION_SERVICE_PATH: "http://notifications-service:9900"

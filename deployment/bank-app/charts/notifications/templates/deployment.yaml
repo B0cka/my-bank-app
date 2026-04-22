@@ -15,7 +15,7 @@ spec:
       containers:
         - name: notifications-service
 
-          image: my-bank-app-notifications-service:v2
+          image: "{{ .Values.notifications.image.repository }}:{{ .Values.notifications.image.tag }}"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9900

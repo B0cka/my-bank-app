@@ -5,6 +5,6 @@ metadata:
   name: cash-config
 data:
   KEYLOACK_CLIENT_ID: "cash-id"
-  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8080/realms/bank-realm"
+  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"
   ACCOUNT_SERVICE_PATH: "http://accounts-service:8090"
   NOTIFICATION_SERVICE_PATH: "http://notifications-service:9900"

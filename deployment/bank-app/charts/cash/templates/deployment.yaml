@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: cash-service
-          image: my-bank-app-cash-service:v2
+          image: "{{ .Values.cash.image.repository }}:{{ .Values.cash.image.tag }}"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8900

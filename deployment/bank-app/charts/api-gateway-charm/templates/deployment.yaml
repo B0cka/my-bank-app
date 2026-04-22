@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: my-bank-app-api-gateway:latest
+          image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
           imagePullPolicy: Never
           ports:
             - containerPort: 8700

@@ -4,4 +4,4 @@ metadata:
   name: notifications-config
 data:
   # Адрес для Keycloak, который работает снаружи Docker Desktop
-  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8080/realms/bank-realm"
+  APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"
