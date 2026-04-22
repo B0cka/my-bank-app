@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
 
     environment {
         IMAGE_TAG = "${BUILD_NUMBER}"
@@ -9,25 +9,19 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build Maven') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-21'
+                }
+            }
             steps {
-                sh '''
-                docker run --rm \
-                  -v "$PWD":/workspace \
-                  -w /workspace \
-                  maven:3.9.6-eclipse-temurin-21 \
-                  mvn clean package -DskipTests
-                '''
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Build Docker Images') {
+            agent any
             steps {
                 sh """
                 docker build -t my-bank-app-accounts-service:${IMAGE_TAG} ./accounts-service
@@ -40,6 +34,7 @@ pipeline {
         }
 
         stage('Deploy with Helm') {
+            agent any
             steps {
                 sh """
                 helm upgrade --install ${RELEASE_NAME} ${CHART_PATH} \
@@ -53,18 +48,10 @@ pipeline {
         }
 
         stage('Helm Smoke Test') {
+            agent any
             steps {
                 sh "helm test ${RELEASE_NAME}"
             }
-        }
-    }
-
-    post {
-        success {
-            echo "Pipeline completed successfully"
-        }
-        failure {
-            echo "Pipeline failed"
         }
     }
 }
