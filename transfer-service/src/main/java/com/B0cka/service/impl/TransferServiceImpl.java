@@ -1,11 +1,10 @@
 package com.B0cka.service.impl;
 
 import com.B0cka.clients.AccountsClient;
-import com.B0cka.clients.NotificationsClient;
-import com.B0cka.dto.NotificationRequest;
 import com.B0cka.dto.TransferRequest;
 import com.B0cka.ex.FundsTransferException;
 import com.B0cka.ex.InvalidAmount;
+import com.B0cka.kafka.producer.TransferEventProducer;
 import com.B0cka.service.TransferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class TransferServiceImpl implements TransferService {
 
     private final AccountsClient accountsClient;
-    private final NotificationsClient notificationsClient;
+    private final TransferEventProducer transferEventProducer;
 
     @Override
     public String transferMoney(TransferRequest transferRequest) {
@@ -35,11 +34,13 @@ public class TransferServiceImpl implements TransferService {
 
         accountsClient.withdraw(senderLogin, transferRequest.getAmount());
         accountsClient.deposit(transferRequest.getRecipientLogin(), transferRequest.getAmount());
+        accountsClient.withdraw(senderLogin, transferRequest.getAmount());
+        accountsClient.deposit(transferRequest.getRecipientLogin(), transferRequest.getAmount());
 
-        notificationsClient.sendNotification(
-                new NotificationRequest(senderLogin,
-                        "Перевод на " + transferRequest.getRecipientLogin() +
-                                " выполнен на сумму " + transferRequest.getAmount())
+        transferEventProducer.sendTransferEvent(
+                senderLogin,
+                transferRequest.getRecipientLogin(),
+                transferRequest.getAmount()
         );
 
         return "Успешный перевод";

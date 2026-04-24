@@ -24,12 +24,16 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://localhost:8080/realms/bank-realm
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        spring.json.add.type.headers: true
 server:
   port: 8900
-
-notification:
-  service:
-    path: http://notifications-service
 
 management:
   endpoint:

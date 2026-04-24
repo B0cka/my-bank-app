@@ -1,31 +1,15 @@
 spring:
   application:
     name: notifications-service
-  cloud:
-    consul:
-      host: localhost
-      port: 8500
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/bank-realm
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notifications-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.B0cka.events"
 
 server:
   port: 9900
-
-
-management:
-  endpoint:
-    health:
-      probes:
-        enabled: true
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus

@@ -1,11 +1,10 @@
 package com.B0cka.service.impl;
 
 import com.B0cka.clients.AccountsClient;
-import com.B0cka.clients.NotificationsClient;
 import com.B0cka.dto.CashAction;
-import com.B0cka.dto.NotificationRequest;
 import com.B0cka.ex.InvalidAction;
 import com.B0cka.ex.InvalidAmount;
+import com.B0cka.kafka.producer.CashEventProducer;
 import com.B0cka.service.CashService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class CashServiceImpl implements CashService {
 
     private final AccountsClient accountsClient;
-    private final NotificationsClient notificationsClient;
+    private final CashEventProducer cashEventProducer;
 
     @Override
     public String performCashOperation(CashAction cashAction, Long sum) {
@@ -32,17 +31,11 @@ public class CashServiceImpl implements CashService {
 
         if (cashAction == CashAction.DEPOSIT) {
             accountsClient.deposit(login, sum);
-
-            notificationsClient.sendNotification(
-                    new NotificationRequest(login, "Счет пополнен на " + sum)
-            );
+            cashEventProducer.sendDepositEvent(login, sum);
 
         } else if (cashAction == CashAction.WITHDRAW) {
             accountsClient.withdraw(login, sum);
-
-            notificationsClient.sendNotification(
-                    new NotificationRequest(login, "Со счета снято " + sum)
-            );
+            cashEventProducer.sendWithdrawEvent(login, sum);
         } else {
             throw new InvalidAction("Неизвестное действие");
         }
