@@ -1,0 +1,81 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounts-service
+
+  template:
+    metadata:
+      labels:
+
+        app: accounts-service
+    spec:
+      initContainers:
+        - name: db-migrator
+          image: "{{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}"
+          imagePullPolicy: Never
+          env:
+
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-service:5432/bank?ssl=false&sslmode=disable"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: SPRING_PROFILES_ACTIVE
+              value: "db-migration"
+
+      containers:
+        - name: accounts-service
+          image: my-bank-app-accounts-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8090
+
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: accounts-config
+                  key: SPRING_DATASOURCE_URL
+            - name: APP_SECURITY_OAUTH2_ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: accounts-config
+                  key: APP_SECURITY_OAUTH2_ISSUER_URI
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s,docker"
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8090
+            initialDelaySeconds: 35

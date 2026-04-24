@@ -5,29 +5,24 @@ spring:
   application:
     name: accounts-service
 
-  cloud:
-    consul:
-      host: consul
-      port: 8500
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/bank-realm
-
-  datasource:
-    url: jdbc:postgresql://postgres:5432/bank?ssl=false&sslmode=disable
-    username: bank
-    password: bank
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
+          issuer-uri: ${APP_SECURITY_OAUTH2_ISSUER_URI}
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

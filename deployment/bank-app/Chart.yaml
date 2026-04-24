@@ -1,0 +1,35 @@
+# Путь: C:\my-bank-app\deployment\bank-app\Chart.yaml
+
+apiVersion: v2
+name: bank-app
+version: 0.1.0
+appVersion: "1.0.0"
+description: A Helm chart for deploying the My Bank application.
+type: application
+
+# --- ОБЯЗАТЕЛЬНАЯ СЕКЦИЯ ДЛЯ ЭТОГО СПОСОБА ---
+dependencies:
+  # Каждый сабчарт - это отдельный пункт списка
+  - name: postgres
+    version: "0.1.0" # Версия сабчарта, должна совпадать с version в его Chart.yaml
+    repository: "file://./charts/postgres" # Путь к локальному сабчарту
+
+  - name: accounts
+    version: "0.1.0"
+    repository: "file://./charts/accounts"
+
+  - name: cash
+    version: "0.1.0"
+    repository: "file://./charts/cash"
+
+  - name: transfer
+    version: "0.1.0"
+    repository: "file://./charts/transfer"
+
+  - name: notifications
+    version: "0.1.0"
+    repository: "file://./charts/notifications"
+
+  - name: api-gateway-charm # <-- Имя папки у тебя такое
+    version: "0.1.0"
+    repository: "file://./charts/api-gateway-charm"

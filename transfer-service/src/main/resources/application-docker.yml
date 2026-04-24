@@ -1,32 +1,37 @@
 spring:
   application:
     name: transfer-service
-  cloud:
-    consul:
-      host: consul
-      port: 8500
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/bank-realm
+          issuer-uri: ${APP_SECURITY_OAUTH2_ISSUER_URI}
       client:
         registration:
           keycloak:
-            client-id: transfer-id
-            client-secret: 47pOpBWwsoNL8wP6O5XftmBTwH5flif8
+            client-id: ${KEYCLOAK_CLIENT_ID}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
             authorization-grant-type: client_credentials
         provider:
           keycloak:
-            issuer-uri: http://keycloak:8080/realms/bank-realm
+            issuer-uri: ${APP_SECURITY_OAUTH2_ISSUER_URI}
 
 account:
   service:
-    path: http://accounts-service
+    path: ${ACCOUNT_SERVICE_PATH}
 
 notification:
   service:
-    path: http://notifications-service
+    path: ${NOTIFICATION_SERVICE_PATH}
 
 server:
   port: 9800
+
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info

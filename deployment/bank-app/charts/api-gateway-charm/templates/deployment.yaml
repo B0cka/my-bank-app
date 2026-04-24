@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8700
+          env:
+            - name: APP_SECURITY_OAUTH2_ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: api-gateway-config
+                  key: APP_SECURITY_OAUTH2_ISSUER_URI
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8700
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8700
+            initialDelaySeconds: 25

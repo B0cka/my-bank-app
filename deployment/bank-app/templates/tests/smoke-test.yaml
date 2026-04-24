@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-smoke-test"
+  annotations:
+    "helm.sh/hook": test
+
+spec:
+  containers:
+    - name: smoke-test
+      image: curlimages/curl:8.5.0
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Testing API Gateway..."
+          curl -f http://api-gateway-service:8700/actuator/health || exit 1
+
+          echo "Testing Accounts..."
+          curl -f http://accounts-service:8090/actuator/health || exit 1
+
+          echo "Testing Transfer..."
+          curl -f http://transfer-service:9800/actuator/health || exit 1
+
+          echo "Testing Cash..."
+          curl -f http://cash-service:8900/actuator/health || exit 1
+
+          echo "Testing Notifications..."
+          curl -f http://notifications-service:9900/actuator/health || exit 1
+
+          echo "All services are healthy"
+  restartPolicy: Never

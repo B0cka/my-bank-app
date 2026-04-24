@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifications-service
+  template:
+    metadata:
+      labels:
+        app: notifications-service
+    spec:
+      containers:
+        - name: notifications-service
+
+          image: "{{ .Values.notifications.image.repository }}:{{ .Values.notifications.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9900
+          env:
+
+            - name: APP_SECURITY_OAUTH2_ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: notifications-config
+                  key: APP_SECURITY_OAUTH2_ISSUER_URI
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9900
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9900
+            initialDelaySeconds: 25

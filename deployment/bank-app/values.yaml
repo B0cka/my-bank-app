@@ -1,0 +1,24 @@
+accounts:
+  image:
+    repository: my-bank-app-accounts-service
+    tag: latest
+
+cash:
+  image:
+    repository: my-bank-app-cash-service
+    tag: v2
+
+transfer:
+  image:
+    repository: my-bank-app-transfer-service
+    tag: v2
+
+notifications:
+  image:
+    repository: my-bank-app-notifications-service
+    tag: v2
+
+apiGateway:
+  image:
+    repository: my-bank-app-api-gateway
+    tag: latest

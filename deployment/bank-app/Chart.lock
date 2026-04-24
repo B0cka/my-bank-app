@@ -1,0 +1,21 @@
+dependencies:
+- name: postgres
+  repository: file://./charts/postgres
+  version: 0.1.0
+- name: accounts
+  repository: file://./charts/accounts
+  version: 0.1.0
+- name: cash
+  repository: file://./charts/cash
+  version: 0.1.0
+- name: transfer
+  repository: file://./charts/transfer
+  version: 0.1.0
+- name: notifications
+  repository: file://./charts/notifications
+  version: 0.1.0
+- name: api-gateway-charm
+  repository: file://./charts/api-gateway-charm
+  version: 0.1.0
+digest: sha256:d7f7a52215e17f85b44364de2ffaf8c59c578dfeeb562b180d6c4a04ddf013e6
+generated: "2026-04-21T21:16:21.2031425+03:00"
