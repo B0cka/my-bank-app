@@ -17,13 +17,18 @@ spring:
           keycloak:
             issuer-uri: ${APP_SECURITY_OAUTH2_ISSUER_URI}
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        spring.json.add.type.headers: true
+
 account:
   service:
     path: http://accounts-service
-
-notification:
-  service:
-    path: http://notifications-service
 
 server:
   port: 8900
