@@ -9,4 +9,4 @@ public record ProfileUpdatedEvent(
         String name,
         LocalDate birthday,
         LocalDateTime occurredAt
-) {}
+) implements BankEvent {}

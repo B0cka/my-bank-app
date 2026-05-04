@@ -1,14 +1,10 @@
 package com.B0cka.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import java.time.LocalDateTime;
 
-@Data
-public class NotificationRequestDto {
-
-    @NotBlank
-    private String login;
-
-    @NotBlank
-    private String message;
-}
+public record NotificationRequestDto(
+        String eventId,
+        String login,
+        Long amount,
+        LocalDateTime occurredAt
+) {}

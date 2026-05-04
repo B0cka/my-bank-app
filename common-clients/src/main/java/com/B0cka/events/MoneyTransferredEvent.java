@@ -8,4 +8,4 @@ public record MoneyTransferredEvent(
         String toLogin,
         Long amount,
         LocalDateTime occurredAt
-) {}
+) implements BankEvent {}

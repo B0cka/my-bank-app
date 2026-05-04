@@ -7,4 +7,4 @@ public record MoneyWithdrawnEvent(
         String login,
         Long amount,
         LocalDateTime occurredAt
-) {}
+) implements BankEvent {}
