@@ -34,8 +34,6 @@ public class TransferServiceImpl implements TransferService {
 
         accountsClient.withdraw(senderLogin, transferRequest.getAmount());
         accountsClient.deposit(transferRequest.getRecipientLogin(), transferRequest.getAmount());
-        accountsClient.withdraw(senderLogin, transferRequest.getAmount());
-        accountsClient.deposit(transferRequest.getRecipientLogin(), transferRequest.getAmount());
 
         transferEventProducer.sendTransferEvent(
                 senderLogin,
