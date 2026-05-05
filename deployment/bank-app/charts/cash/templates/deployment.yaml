@@ -23,18 +23,17 @@ spec:
               value: "docker"
             - name: APP_SECURITY_OAUTH2_ISSUER_URI
               valueFrom: { configMapKeyRef: { name: cash-config, key: APP_SECURITY_OAUTH2_ISSUER_URI } }
-            - name: KEYLOACK_CLIENT_ID
-              valueFrom: { configMapKeyRef: { name: cash-config, key: KEYLOACK_CLIENT_ID } }
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom: { configMapKeyRef: { name: cash-config, key: KEYCLOAK_CLIENT_ID } }
             - name: ACCOUNT_SERVICE_PATH
               valueFrom: { configMapKeyRef: { name: cash-config, key: ACCOUNT_SERVICE_PATH } }
-            - name: NOTIFICATION_SERVICE_PATH
-              valueFrom: { configMapKeyRef: { name: cash-config, key: NOTIFICATION_SERVICE_PATH } }
-
-            - name: KEYLOACK_CLIENT_SECRET
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-broker-0.kafka-headless.default.svc.cluster.local:9092"
+            - name: KEYCLOAK_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: cash-secret
-                  key: KEYLOACK_CLIENT_SECRET
+                  key: KEYCLOAK_CLIENT_SECRET
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

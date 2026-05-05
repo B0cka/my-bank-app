@@ -19,15 +19,14 @@ spec:
           ports:
             - containerPort: 9800
           env:
-
             - name: APP_SECURITY_OAUTH2_ISSUER_URI
               valueFrom: { configMapKeyRef: { name: transfer-config, key: APP_SECURITY_OAUTH2_ISSUER_URI } }
             - name: KEYCLOAK_CLIENT_ID
               valueFrom: { configMapKeyRef: { name: transfer-config, key: KEYCLOAK_CLIENT_ID } }
             - name: ACCOUNT_SERVICE_PATH
               valueFrom: { configMapKeyRef: { name: transfer-config, key: ACCOUNT_SERVICE_PATH } }
-            - name: NOTIFICATION_SERVICE_PATH
-              valueFrom: { configMapKeyRef: { name: transfer-config, key: NOTIFICATION_SERVICE_PATH } }
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-broker-0.kafka-headless.default.svc.cluster.local:9092"
             - name: SPRING_PROFILES_ACTIVE
               value: "docker"
             - name: KEYCLOAK_CLIENT_SECRET
@@ -35,7 +34,6 @@ spec:
                 secretKeyRef:
                   name: transfer-secret
                   key: KEYCLOAK_CLIENT_SECRET
-
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

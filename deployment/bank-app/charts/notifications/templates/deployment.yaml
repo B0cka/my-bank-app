@@ -14,19 +14,18 @@ spec:
     spec:
       containers:
         - name: notifications-service
-
-          image: "{{ .Values.notifications.image.repository }}:{{ .Values.notifications.image.tag }}"
+          image: "{{ .Values.image.repository}}:{{ .Values.image.tag}}"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9900
           env:
-
             - name: APP_SECURITY_OAUTH2_ISSUER_URI
               valueFrom:
                 configMapKeyRef:
                   name: notifications-config
                   key: APP_SECURITY_OAUTH2_ISSUER_URI
-
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-broker-0.kafka-headless.default.svc.cluster.local:9092"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

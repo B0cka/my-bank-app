@@ -16,11 +16,14 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080/realms/bank-realm
 
-  datasource:
-    url: jdbc:postgresql://127.0.0.1:5444/bank?ssl=false&sslmode=disable
-    username: bank
-    password: bank
-    driver-class-name: org.postgresql.Driver
+  kafka:
+    consumer:
+      group-id: notifications-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.B0cka.events"
+        spring.json.use.type.headers: true
 
   jpa:
     hibernate:

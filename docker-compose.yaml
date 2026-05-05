@@ -1,15 +1,76 @@
+version: '3.8'
+
 services:
-#  postgres:
-#    image: postgres:16
-#    container_name: postgres
-#    environment:
-#      POSTGRES_DB: bank
-#      POSTGRES_USER: bank
-#      POSTGRES_PASSWORD: bank
-#    ports:
-#      - "5444:5432"
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: bank
+      POSTGRES_USER: bank
+      POSTGRES_PASSWORD: bank
+    ports:
+      - "5444:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bank-network
+
+
+  accounts-service:
+    build: ./accounts-service
+    image: my-bank-app-accounts-service:v4
+    container_name: accounts-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank
+    ports:
+      - "8090:8090"
+    depends_on:
+      - postgres
+      - keycloak
+    networks:
+      - bank-network
+
+  cash-service:
+    build: ./cash-service
+    image: my-bank-app-cash-service:v4
+    container_name: cash-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8900:8900"
+    depends_on:
+      - keycloak
+      - accounts-service
+    networks:
+      - bank-network
+
+  transfer-service:
+    build: ./transfer-service
+    image: my-bank-app-transfer-service:v4
+    container_name: transfer-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "9800:9800"
+    depends_on:
+      - keycloak
+      - accounts-service
+    networks:
+      - bank-network
+
+  notifications-service:
+    build: ./notifications-service
+    image: my-bank-app-notifications-service:v5
+    container_name: notifications-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "9900:9900"
+    depends_on:
+      - keycloak
+    networks:
+      - bank-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.1.3
@@ -22,93 +83,48 @@ services:
       - "8181:8080"
     volumes:
       - ./infra/keycloak/realm-export:/opt/keycloak/data/import
+    networks:
+      - bank-network
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: jenkins
-    privileged: true
-    user: root
+  api-gateway:
+    build: ./api-gateway
+    image: my-bank-app-api-gateway:v4
+    container_name: api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - jenkins_data:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
+      - "8700:8700"
+    depends_on:
+      - keycloak
+      - accounts-service
+      - cash-service
+      - transfer-service
+    networks:
+      - bank-network
+
+
+  front-ui:
+    build: ./front-ui
+    image: my-bank-app-front-ui:latest
+    container_name: front-ui
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8180:8180"
+    depends_on:
+      - keycloak
+      - api-gateway
+    networks:
+      - bank-network
+
+networks:
+  bank-network:
+    driver: bridge
 
 volumes:
-  jenkins_data:
+  postgres_data:
+  zookeeper-data:
+  zookeeper-log:
+  kafka-data:
 
 
-#  accounts-service:
-#    build: ./accounts-service
-#    container_name: accounts-service
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    ports:
-#      - "8090:8090"
-#    depends_on:
-#      - keycloak
-#      - postgres
-#
-#  cash-service:
-#    build: ./cash-service
-#    container_name: cash-service
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    ports:
-#      - "8900:8900"
-#    depends_on:
-#      - keycloak
-#      - accounts-service
-#
-#  transfer-service:
-#    build: ./transfer-service
-#    container_name: transfer-service
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    ports:
-#      - "9800:9800"
-#    depends_on:
-#
-#      - keycloak
-#      - accounts-service
-#
-#  notifications-service:
-#    build: ./notifications-service
-#    container_name: notifications-service
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    ports:
-#      - "9900:9900"
-#    depends_on:
-#
-#      - keycloak
-#
-#  api-gateway:
-#    build: ./api-gateway
-#    container_name: api-gateway
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    ports:
-#      - "8700:8700"
-#    depends_on:
-#
-#      - keycloak
-#      - accounts-service
-#      - cash-service
-#      - transfer-service
-#
-#  front-ui:
-#    build: ./front-ui
-#    container_name: front-ui
-#    environment:
-#      SPRING_PROFILES_ACTIVE: docker
-#    ports:
-#      - "8180:8180"
-#    depends_on:
-#      - keycloak
-#      - api-gateway
-#
-#volumes:
-#  postgres_data:

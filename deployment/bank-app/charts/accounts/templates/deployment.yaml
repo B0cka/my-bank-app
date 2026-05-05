@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,19 +7,16 @@ spec:
   selector:
     matchLabels:
       app: accounts-service
-
   template:
     metadata:
       labels:
-
         app: accounts-service
     spec:
       initContainers:
         - name: db-migrator
           image: "{{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}"
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           env:
-
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgres-service:5432/bank?ssl=false&sslmode=disable"
             - name: SPRING_DATASOURCE_USERNAME
@@ -35,14 +31,12 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: SPRING_PROFILES_ACTIVE
               value: "db-migration"
-
       containers:
         - name: accounts-service
-          image: my-bank-app-accounts-service:latest
-          imagePullPolicy: IfNotPresent
+          image: "{{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}"
+          imagePullPolicy: Never
           ports:
             - containerPort: 8090
-
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:
@@ -64,10 +58,10 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
-
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-broker-0.kafka-headless.default.svc.cluster.local:9092"
             - name: SPRING_PROFILES_ACTIVE
               value: "k8s,docker"
-
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

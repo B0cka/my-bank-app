@@ -1,5 +1,6 @@
 package com.b0cka.service.impl;
 
+import com.B0cka.events.ProfileUpdatedEvent;
 import com.b0cka.component.AccountMapper;
 import com.b0cka.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
@@ -9,6 +10,7 @@ import com.b0cka.ex.InvalidLoginException;
 import com.b0cka.ex.NotEnoughException;
 import com.b0cka.ex.NotFoundException;
 import com.b0cka.ex.YoungUserException;
+import com.b0cka.kafka.producer.NotificationClientProducer;
 import com.b0cka.repository.AccountRepository;
 import com.b0cka.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +21,17 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final NotificationClientProducer notificationClientProducer;
 
     @Override
     public List<AccountDto> getOtherAccounts() {
@@ -57,6 +62,16 @@ public class AccountServiceImpl implements AccountService {
         account.setBirthday(updateAccountDto.getBirthday());
 
         accountRepository.save(account);
+
+        notificationClientProducer.sendToNotificationService(
+                new ProfileUpdatedEvent(
+                        UUID.randomUUID().toString(),
+                        currentUser(),
+                        updateAccountDto.getName(),
+                        updateAccountDto.getBirthday(),
+                        LocalDateTime.now()
+                )
+        );
 
         return AccountMapper.toDto(account);
     }
