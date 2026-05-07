@@ -23,7 +23,7 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security
                 .authorizeHttpRequests(requests ->
-                        requests.requestMatchers("/actuator/health/**").permitAll()
+                        requests.requestMatchers("/actuator/**", "/accounts/mdc/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(customizer -> customizer
                         .jwt(jwtCustomizer -> {
