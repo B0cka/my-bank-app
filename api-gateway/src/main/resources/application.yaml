@@ -28,7 +28,13 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080/realms/bank-realm
 management:
+  tracing:
+    sampling:
+      probability: 1
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: '*'
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
