@@ -34,9 +34,13 @@ server:
   port: 9800
 
 management:
-  security:
-    enabled: false
+  tracing:
+    sampling:
+      probability: 1
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: '*'
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_PATH}

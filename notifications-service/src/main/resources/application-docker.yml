@@ -22,7 +22,13 @@ server:
   port: 9900
 
 management:
+  tracing:
+    sampling:
+      probability: 1
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: '*'
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_PATH}

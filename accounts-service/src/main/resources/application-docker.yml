@@ -31,13 +31,13 @@ spring:
           issuer-uri: ${APP_SECURITY_OAUTH2_ISSUER_URI}
 
 management:
-  zipkin:
-    tracing:
-      endpoint:  ${ZIPKIN_PATH}
   tracing:
     sampling:
       probability: 1
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: '*'
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_PATH}
