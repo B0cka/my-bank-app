@@ -63,6 +63,7 @@ public class AccountController {
 
     @GetMapping("/mdc")
     public String test() {
+        log.info("TEST LOG");
         return "Trace: " + tracer.currentSpan().context().traceId();
     }
 
