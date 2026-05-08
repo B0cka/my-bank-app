@@ -51,7 +51,7 @@ public class TransferServiceImpl implements TransferService {
             meterRegistry.counter("bank.transfer.failed", "from", senderLogin, "to", recipientLogin)
                     .increment();
             log.error("Transfer failed for {} -> {}: {}", senderLogin, recipientLogin, e.getMessage(), e);
-            throw new FundsTransferException("Ошибка при выполнении перевода", e);
+            throw new FundsTransferException("Ошибка при выполнении перевода " + e.getMessage());
         }
     }
 
