@@ -5,12 +5,12 @@ import com.b0cka.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
 import com.b0cka.dto.UpdateAccountDto;
 import com.b0cka.entity.Account;
-import com.b0cka.ex.InvalidLoginException;
 import com.b0cka.ex.NotEnoughException;
 import com.b0cka.ex.NotFoundException;
 import com.b0cka.ex.YoungUserException;
 import com.b0cka.repository.AccountRepository;
 import com.b0cka.service.AccountService;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -29,6 +29,7 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final MeterRegistry meterRegistry;
 
     @Override
     public List<AccountDto> getOtherAccounts() {
@@ -123,6 +124,7 @@ public class AccountServiceImpl implements AccountService {
         if (account.getBalance() < amount) {
             log.warn("Withdrawal rejected: insufficient funds for user: {}, requested: {}, available: {}",
                     login, amount, account.getBalance());
+            meterRegistry.counter("bank.withdrawal.failed", "login", login).increment();
             throw new NotEnoughException("Недостаточно средств на счету");
         }
 
