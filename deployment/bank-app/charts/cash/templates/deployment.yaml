@@ -34,6 +34,16 @@ spec:
                 secretKeyRef:
                   name: cash-secret
                   key: KEYCLOAK_CLIENT_SECRET
+            - name: LOGSTASH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cash-config
+                  key: LOGSTASH_HOST
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: cash-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

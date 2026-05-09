@@ -6,8 +6,9 @@
         </encoder>
     </appender>
 
+    <springProperty name="LOGSTASH_HOST" source="logstash.host" defaultValue="logstash"/>
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5044</destination>
+        <destination>${LOGSTASH_HOST}:5044</destination>/destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeMdcKeyName>traceId</includeMdcKeyName>
             <includeMdcKeyName>spanId</includeMdcKeyName>

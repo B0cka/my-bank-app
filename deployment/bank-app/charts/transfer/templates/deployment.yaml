@@ -34,6 +34,16 @@ spec:
                 secretKeyRef:
                   name: transfer-secret
                   key: KEYCLOAK_CLIENT_SECRET
+            - name: LOGSTASH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: transfer-config
+                  key: LOGSTASH_HOST
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: transfer-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

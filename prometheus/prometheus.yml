@@ -5,37 +5,37 @@ rule_files:
   - "alerts.yml"
 
 scrape_configs:
-  - job_name: 'api-gateway'
+  - job_name: 'accounts-service-k8s'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'host.docker.internal:8700' ]
-        labels:
-          application: 'api-gateway'
-
-  - job_name: 'accounts-service'
-    metrics_path: /actuator/prometheus
-    static_configs:
-      - targets: [ 'host.docker.internal:8090' ]
+      - targets: [ 'host.docker.internal:30090' ]
         labels:
           application: 'accounts-service'
 
-  - job_name: 'cash-service'
+  - job_name: 'api-gateway-k8s'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'host.docker.internal:8900' ]
+      - targets: [ 'host.docker.internal:30090' ]
+        labels:
+          application: 'api-gateway'
+
+  - job_name: 'cash-service-k8s'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'host.docker.internal:30090' ]
         labels:
           application: 'cash-service'
 
-  - job_name: 'notifications-service'
+  - job_name: 'transfer-service-k8s'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'host.docker.internal:9900' ]
-        labels:
-          application: 'notifications-service'
-
-  - job_name: 'transfer-service'
-    metrics_path: /actuator/prometheus
-    static_configs:
-      - targets: [ 'host.docker.internal:9800' ]
+      - targets: [ 'host.docker.internal:30090' ]
         labels:
           application: 'transfer-service'
+
+  - job_name: 'notifications-service-k8s'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'host.docker.internal:30090' ]
+        labels:
+          application: 'notifications-service'

@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: transfer-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: transfer-service
   ports:
@@ -11,3 +11,4 @@ spec:
       protocol: TCP
       port: 9800
       targetPort: 9800
+      nodePort: 30094

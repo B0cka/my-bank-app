@@ -2,28 +2,28 @@ api-gateway-charm:
   apiGateway:
     image:
       repository: my-bank-app-api-gateway
-      tag: v4
+      tag: v7
 
 accounts:
   accounts:
     image:
       repository: my-bank-app-accounts-service
-      tag: v4
+      tag: v8
 
 cash:
   cash:
     image:
       repository: my-bank-app-cash-service
-      tag: v4
+      tag: v8
 
 transfer:
   transfer:
     image:
       repository: my-bank-app-transfer-service
-      tag: v4
+      tag: v8
 
 notifications:
   notifications:
     image:
       repository: my-bank-app-notifications-service
-      tag: v5
+      tag: v8

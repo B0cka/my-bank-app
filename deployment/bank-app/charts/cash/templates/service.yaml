@@ -4,7 +4,7 @@ metadata:
 
   name: cash-service
 spec:
-  type: ClusterIP
+  type: NodePort
 
   selector:
     app: cash-service
@@ -14,3 +14,4 @@ spec:
       protocol: TCP
       port: 8900
       targetPort: 8900
+      nodePort: 30092

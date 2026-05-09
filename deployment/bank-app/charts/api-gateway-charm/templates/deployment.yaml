@@ -24,7 +24,16 @@ spec:
                 configMapKeyRef:
                   name: api-gateway-config
                   key: APP_SECURITY_OAUTH2_ISSUER_URI
-
+            - name: LOGSTASH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: api-gateway-config
+                  key: LOGSTASH_HOST
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: api-gateway-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

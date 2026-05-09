@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: api-gateway-service
 spec:
+  type: NodePort
   selector:
     app: api-gateway
   ports:
     - protocol: TCP
       port: 8700
       targetPort: 8700
+      nodePort: 30091
