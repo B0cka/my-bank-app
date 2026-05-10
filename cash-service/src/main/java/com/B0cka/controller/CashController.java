@@ -20,7 +20,7 @@ public class CashController {
 
     @PostMapping("/actions-with-money")
     public String actionsWithMoney(@RequestBody @Valid CashRequestDto cashRequestDto){
-        return cashService.performCashOperation(cashRequestDto.getCashAction(), cashRequestDto.getSum());
+        return cashService.performCashOperation(cashRequestDto.getCashAction(), cashRequestDto.getAmount());
     }
 
 }
