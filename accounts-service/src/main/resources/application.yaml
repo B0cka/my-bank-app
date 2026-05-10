@@ -23,6 +23,7 @@ spring:
           issuer-uri: http://localhost:8080/realms/bank-realm
 
   kafka:
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: notifications-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -30,6 +31,12 @@ spring:
       properties:
         spring.json.trusted.packages: "com.B0cka.events"
         spring.json.use.type.headers: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        spring.json.add.type.headers: true
 
   jpa:
     hibernate:
