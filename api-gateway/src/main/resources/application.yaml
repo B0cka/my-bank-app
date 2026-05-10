@@ -4,23 +4,27 @@ server:
 spring:
   application:
     name: api-gateway
-
+  cloud:
     gateway:
       routes:
         - id: accounts-service-route
-          uri: lb://accounts-service
+          uri: http://localhost:8090
           predicates:
             - Path=/accounts/**
 
         - id: cash-service-route
-          uri: lb://cash-service
+          uri: http://localhost:8900
           predicates:
             - Path=/cash/**
 
         - id: transfer-service-route
-          uri: lb://transfer-service
+          uri: http://localhost:9800
           predicates:
             - Path=/transfer/**
+        - id: notifications-service-route
+          uri: http://localhost:9900
+          predicates:
+            - Path=/notifications/**
 
   security:
     oauth2:
