@@ -1,7 +1,7 @@
 package com.b0cka.service.impl;
 
 import com.b0cka.component.AccountMapper;
-import com.b0cka.dto.AccountBalanceOperationRequest;
+import com.b0cka.common.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
 import com.b0cka.dto.UpdateAccountDto;
 import com.b0cka.entity.Account;

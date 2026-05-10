@@ -1,6 +1,6 @@
 package com.b0cka.clients;
 
-import com.b0cka.dto.AccountBalanceOperationRequest;
+import com.b0cka.common.dto.AccountBalanceOperationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -29,10 +29,7 @@ public class AccountsClientImpl implements AccountsClient {
                 .post()
                 .uri(accountServicePath + "/accounts/internal/deposit")
                 .header("Authorization", "Bearer " + accessToken)
-                .body(AccountBalanceOperationRequest.builder()
-                        .login(login)
-                        .amount(amount)
-                        .build())
+                .body(new AccountBalanceOperationRequest(login, amount))
                 .retrieve()
                 .toBodilessEntity();
     }
@@ -45,10 +42,7 @@ public class AccountsClientImpl implements AccountsClient {
                 .post()
                 .uri(accountServicePath + "/accounts/internal/withdraw")
                 .header("Authorization", "Bearer " + accessToken)
-                .body(AccountBalanceOperationRequest.builder()
-                        .login(login)
-                        .amount(amount)
-                        .build())
+                .body(new AccountBalanceOperationRequest(login, amount))
                 .retrieve()
                 .toBodilessEntity();
     }
