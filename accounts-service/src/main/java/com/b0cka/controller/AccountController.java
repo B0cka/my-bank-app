@@ -4,7 +4,7 @@ import com.b0cka.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
 import com.b0cka.dto.UpdateAccountDto;
 import com.b0cka.service.AccountService;
-import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.Tracer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @Autowired
-    private io.micrometer.tracing.Tracer tracer;
-
-    @Autowired
-    private ObservationRegistry registry;
+    private Tracer tracer;
 
     @PostMapping("/me")
     public AccountDto updateCurrentAccount(@RequestBody @Valid UpdateAccountDto updateAccountDto) {
