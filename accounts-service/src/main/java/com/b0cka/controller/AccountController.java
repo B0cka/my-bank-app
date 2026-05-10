@@ -4,18 +4,15 @@ import com.b0cka.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
 import com.b0cka.dto.UpdateAccountDto;
 import com.b0cka.service.AccountService;
-import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Validated
@@ -47,14 +44,14 @@ public class AccountController {
         return accountService.getOtherAccounts();
     }
 
-    @Transactional
+
     @PostMapping("/internal/deposit")
     public void deposit(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
         accountService.deposit(accountBalanceOperationRequest);
     }
 
-    @Transactional
+
     @PostMapping("/internal/withdraw")
     public void withdraw(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
