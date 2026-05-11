@@ -52,7 +52,7 @@ class TransferServiceImplTest {
         Authentication auth = new JwtAuthenticationToken(mockJwt, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        lenient().when(meterRegistry.counter(anyString(), anyString(), anyString(), anyString(), anyString()))
+        lenient().when(meterRegistry.counter(anyString(), anyString(), anyString()))
                 .thenReturn(counter);
     }
 
@@ -75,6 +75,8 @@ class TransferServiceImplTest {
         verify(accountsClient).withdraw("sender_user", 100L);
         verify(accountsClient).deposit("recipient_user", 100L);
         verify(transferEventProducer).sendTransferEvent("sender_user", "recipient_user", 100L);
+        verify(meterRegistry).counter("bank.transfer.success", "operation", "transfer");
+        verify(counter).increment();
     }
 
     @Test
@@ -86,7 +88,7 @@ class TransferServiceImplTest {
                 () -> transferService.transferMoney(request));
         assertEquals("Нельзя переводить самому себе!", ex.getMessage());
 
-        verify(meterRegistry).counter(eq("bank.transfer.failed"), eq("from"), eq("sender_user"), eq("to"), eq("sender_user"));
+        verify(meterRegistry).counter("bank.transfer.failed", "reason", "self_transfer");
         verify(counter).increment();
     }
 
@@ -99,22 +101,21 @@ class TransferServiceImplTest {
                 () -> transferService.transferMoney(request));
         assertEquals("Сумма перевода меньше минимальной!", ex.getMessage());
 
-        verify(meterRegistry).counter(eq("bank.transfer.failed"), anyString(), anyString(), anyString(), anyString());
+        verify(meterRegistry).counter("bank.transfer.failed", "reason", "invalid_amount");
         verify(counter).increment();
     }
 
     @Test
-    @DisplayName("Ошибка при вызове клиента → FundsTransferException + откат метрики")
-    void transferMoney_clientError_throwsException() {
-
+    @DisplayName("Ошибка при списании → FundsTransferException + метрика")
+    void transferMoney_withdrawError_throwsException() {
         TransferRequest request = new TransferRequest("recipient_user", 100L);
         doThrow(new RuntimeException("Service unavailable")).when(accountsClient).withdraw(anyString(), anyLong());
 
         FundsTransferException ex = assertThrows(FundsTransferException.class,
                 () -> transferService.transferMoney(request));
-        assertTrue(ex.getMessage().contains("Ошибка при выполнении перевода"));
+        assertTrue(ex.getMessage().contains("Ошибка при списании средств"));
 
-        verify(meterRegistry).counter(eq("bank.transfer.failed"), anyString(), anyString(), anyString(), anyString());
+        verify(meterRegistry).counter("bank.transfer.failed", "reason", "withdraw_error");
         verify(counter).increment();
     }
 }

@@ -21,7 +21,7 @@ public class CashServiceImpl implements CashService {
     private final CashEventProducer cashEventProducer;
 
     @Override
-    public String performCashOperation(CashAction cashAction, Long sum) {
+    public String performCashOperation(CashAction cashAction, long sum) {
 
         if (sum <= 0) {
             throw new InvalidAmount("Сумма должна быть больше нуля!");

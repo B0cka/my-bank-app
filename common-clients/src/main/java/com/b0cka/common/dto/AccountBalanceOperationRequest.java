@@ -8,7 +8,7 @@ public class AccountBalanceOperationRequest {
     @NotBlank
     private String login;
     @Min(1)
-    private Long amount;
+    private long amount;
 
     public @NotBlank String getLogin() {
         return login;

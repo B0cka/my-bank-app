@@ -13,5 +13,5 @@ public class CashRequestDto {
 
     @NotNull
     @Min(1)
-    private Long amount;
+    private long amount;
 }

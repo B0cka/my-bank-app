@@ -4,6 +4,6 @@ import com.b0cka.dto.CashAction;
 
 public interface CashService {
 
-    String performCashOperation(CashAction cashAction, Long sum);
+    String performCashOperation(CashAction cashAction, long sum);
 
 }
