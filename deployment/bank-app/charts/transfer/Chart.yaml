@@ -1,6 +1,6 @@
 apiVersion: v2
 name: transfer
-description: A Helm chart for a PostgreSQL database.
+description: A Helm chart for a transfer service.
 type: application
-version: 0.1.0 # <-- Запомни эту версию
-appVersion: "16.0"
+version: 0.1.0
+appVersion: "1.0.0"
