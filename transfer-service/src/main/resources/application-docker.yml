@@ -44,3 +44,6 @@ management:
   zipkin:
     tracing:
       endpoint: ${ZIPKIN_PATH}
+app:
+  security:
+    enabled: "true"

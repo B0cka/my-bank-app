@@ -8,22 +8,22 @@ accounts:
   accounts:
     image:
       repository: my-bank-app-accounts-service
-      tag: v8
+      tag: v9
 
 cash:
   cash:
     image:
       repository: my-bank-app-cash-service
-      tag: v8
+      tag: v9
 
 transfer:
   transfer:
     image:
       repository: my-bank-app-transfer-service
-      tag: v8
+      tag: v9
 
 notifications:
   notifications:
     image:
       repository: my-bank-app-notifications-service
-      tag: v8
+      tag: v11

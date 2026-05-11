@@ -125,7 +125,7 @@ services:
 # ------------ сервисы -------------------- :)
   accounts-service:
     build: ./accounts-service
-    image: my-bank-app-accounts-service:v8
+    image: my-bank-app-accounts-service:v9
     container_name: accounts-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -146,7 +146,7 @@ services:
 
   cash-service:
     build: ./cash-service
-    image: my-bank-app-cash-service:v8
+    image: my-bank-app-cash-service:v9
     container_name: cash-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -157,6 +157,8 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ZIPKIN_PATH: http://zipkin:9411/api/v2/spans
       ACCOUNT_SERVICE_PATH: http://accounts-service:8090
+      APP_SECURITY_ENABLED: true
+
     ports:
       - "8900:8900"
     depends_on:
@@ -167,7 +169,7 @@ services:
 
   transfer-service:
     build: ./transfer-service
-    image: my-bank-app-transfer-service:v8
+    image: my-bank-app-transfer-service:v9
     container_name: transfer-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -178,6 +180,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ZIPKIN_PATH: http://zipkin:9411/api/v2/spans
       ACCOUNT_SERVICE_PATH: http://accounts-service:8090
+      APP_SECURITY_ENABLED: true
     ports:
       - "9800:9800"
     depends_on:
@@ -188,7 +191,7 @@ services:
 
   notifications-service:
     build: ./notifications-service
-    image: my-bank-app-notifications-service:v8
+    image: my-bank-app-notifications-service:v11
     container_name: notifications-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -196,6 +199,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-realm
       MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      APP_SECURITY_ENABLED: false
     ports:
       - "9900:9900"
     depends_on:
@@ -235,7 +239,6 @@ services:
       - transfer-service
     networks:
       - bank-network
-
 
   front-ui:
     build: ./front-ui

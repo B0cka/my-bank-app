@@ -31,6 +31,8 @@ spec:
                 configMapKeyRef:
                   name: notifications-config
                   key: LOGSTASH_HOST
+            - name: APP_SECURITY_ENABLED
+              value: "false"
             - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
               valueFrom:
                 configMapKeyRef:

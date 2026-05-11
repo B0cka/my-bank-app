@@ -3,7 +3,6 @@ package com.b0cka.controller;
 import com.b0cka.common.dto.AccountBalanceOperationRequest;
 import com.b0cka.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,6 @@ class AccountControllerSecurityTest {
 
     @MockBean
     private JwtDecoder jwtDecoder;
-
-    @MockBean
-    private Tracer tracer;
-
 
     @Autowired
     private MockMvc mockMvc;
