@@ -4,9 +4,6 @@ metadata:
   name: accounts-config
 data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/bank?ssl=false&sslmode=disable"
-
   APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"
-
   MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://host.docker.internal:9411/api/v2/spans"
-
   LOGSTASH_HOST: "host.docker.internal"

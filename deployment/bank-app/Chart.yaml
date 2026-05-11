@@ -1,9 +1,8 @@
-
 apiVersion: v2
 name: bank-app
 version: 0.1.0
 appVersion: "1.0.0"
-description: A Helm chart for deploying the My Bank application.
+description: A Helm chart for deploying the My Bank application with full observability stack.
 type: application
 
 dependencies:
@@ -30,3 +29,46 @@ dependencies:
   - name: api-gateway-charm
     version: "0.1.0"
     repository: "file://./charts/api-gateway-charm"
+
+  - name: prometheus
+    version: "25.20.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: observability.enabled
+
+  - name: grafana
+    version: "8.0.0"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: observability.enabled
+
+  # Tracing
+  - name: zipkin
+    version: "2.4.0"
+    repository: "https://openzipkin.github.io/zipkin-helm"
+    condition: observability.enabled
+
+  # Logging (ELK)
+  - name: elasticsearch
+    version: "8.12.0"
+    repository: "https://helm.elastic.co"
+    condition: observability.enabled
+
+  - name: kibana
+    version: "8.12.0"
+    repository: "https://helm.elastic.co"
+    condition: observability.enabled
+
+  - name: logstash
+    version: "3.2.0"
+    repository: "https://kokuwaio.github.io/helm-charts"
+    condition: observability.enabled
+
+  # Messaging
+  - name: kafka
+    version: "26.8.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: observability.enabled
+
+  - name: zookeeper
+    version: "12.6.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: observability.enabled

@@ -25,8 +25,7 @@ public class NotificationsConsumer {
             }
         } catch (Exception e) {
             String login = extractLogin(event);
-            meterRegistry.counter("bank.notification.failed", "login", login)
-                    .increment();
+            meterRegistry.counter("bank.notification.failed", "reason", "processing_error").increment();
             log.error("Failed to process notification for user: {}", login, e);
         }
     }
@@ -52,19 +51,17 @@ public class NotificationsConsumer {
     }
 
     private void sendNotification(String login, String message) {
-
         if ("broken".equals(login)) {
             throw new RuntimeException("Simulated notification failure");
         }
         log.info("Notification sent to {}: {}", login, message);
     }
 
-
     private String extractLogin(BankEvent event) {
         return switch (event) {
             case MoneyDepositedEvent e -> e.login();
             case MoneyWithdrawnEvent e -> e.login();
-            case MoneyTransferredEvent e -> e.toLogin(); // или fromLogin, по ТЗ
+            case MoneyTransferredEvent e -> e.toLogin();
             case ProfileUpdatedEvent e -> e.login();
             default -> "unknown";
         };

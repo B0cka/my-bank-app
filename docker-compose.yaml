@@ -146,7 +146,7 @@ services:
 
   cash-service:
     build: ./cash-service
-    image: my-bank-app-cash-service:v9
+    image: my-bank-app-cash-service:v10
     container_name: cash-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -169,7 +169,7 @@ services:
 
   transfer-service:
     build: ./transfer-service
-    image: my-bank-app-transfer-service:v9
+    image: my-bank-app-transfer-service:v10
     container_name: transfer-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -191,7 +191,7 @@ services:
 
   notifications-service:
     build: ./notifications-service
-    image: my-bank-app-notifications-service:v11
+    image: my-bank-app-notifications-service:v13
     container_name: notifications-service
     environment:
       SPRING_PROFILES_ACTIVE: docker

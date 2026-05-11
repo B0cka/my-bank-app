@@ -8,8 +8,8 @@ groups:
           severity: warning
           service: accounts
         annotations:
-          summary: "Много неуспешных снятий"
-          description: "Пользователь {{ $labels.login }} не может снять деньги. Ошибок: {{ $value }} в секунду"
+          summary: "Много неуспешных снятий в {{ $labels.application }}"
+          description: "Скорость ошибок: {{ $value }} в секунду"
 
       - alert: HighTransferFailures
         expr: rate(bank_transfer_failed_total[5m]) > 0.05
@@ -18,8 +18,8 @@ groups:
           severity: critical
           service: transfer
         annotations:
-          summary: "Проблемы с переводами"
-          description: "Перевод от {{ $labels.from }} к {{ $labels.to }} не проходит. Ошибок: {{ $value }} в секунду"
+          summary: "Проблемы с переводами в {{ $labels.application }}"
+          description: "Скорость ошибок: {{ $value }} в секунду"
 
       - alert: HighNotificationFailures
         expr: rate(bank_notification_failed_total[5m]) > 0.1
@@ -28,8 +28,8 @@ groups:
           severity: warning
           service: notifications
         annotations:
-          summary: "Сервис уведомлений не работает"
-          description: "Не удаётся отправить уведомление пользователю {{ $labels.login }}. Ошибок: {{ $value }} в секунду"
+          summary: "Сервис уведомлений не работает ({{ $labels.application }})"
+          description: "Скорость ошибок: {{ $value }} в секунду"
 
       - alert: HighHttpErrorRate
         expr: |

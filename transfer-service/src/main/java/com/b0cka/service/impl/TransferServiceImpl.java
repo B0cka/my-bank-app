@@ -31,27 +31,47 @@ public class TransferServiceImpl implements TransferService {
         long amount = transferRequest.getAmount();
 
         if (recipientLogin.equals(senderLogin)) {
-            meterRegistry.counter("bank.transfer.failed", "from", senderLogin, "to", recipientLogin).increment();
+            meterRegistry.counter("bank.transfer.failed", "reason", "self_transfer").increment();
             throw new FundsTransferException("Нельзя переводить самому себе!");
         }
 
         if (amount <= 0) {
-            meterRegistry.counter("bank.transfer.failed", "from", senderLogin, "to", recipientLogin).increment();
+            meterRegistry.counter("bank.transfer.failed", "reason", "invalid_amount").increment();
             throw new InvalidAmount("Сумма перевода меньше минимальной!");
         }
+
         try {
             accountsClient.withdraw(senderLogin, amount);
-            accountsClient.deposit(recipientLogin, amount);
-            transferEventProducer.sendTransferEvent(senderLogin, recipientLogin, amount);
+            try {
+                accountsClient.deposit(recipientLogin, amount);
 
-            return "Успешный перевод";
+                transferEventProducer.sendTransferEvent(senderLogin, recipientLogin, amount);
 
-        } catch (Exception e) {
+                meterRegistry.counter("bank.transfer.success", "operation", "transfer").increment();
+                return "Успешный перевод";
 
-            meterRegistry.counter("bank.transfer.failed", "from", senderLogin, "to", recipientLogin)
-                    .increment();
-            log.error("Transfer failed for {} -> {}: {}", senderLogin, recipientLogin, e.getMessage(), e);
-            throw new FundsTransferException("Ошибка при выполнении перевода " + e.getMessage());
+            } catch (Exception depositEx) {
+                log.error("Deposit failed for {}. Attempting compensation refund to {}", recipientLogin, senderLogin, depositEx);
+                try {
+                    accountsClient.deposit(senderLogin, amount);
+                    log.info("Compensation successful. Refunded {} to {}", amount, senderLogin);
+                    meterRegistry.counter("bank.transfer.compensated", "operation", "refund").increment();
+                } catch (Exception compensationEx) {
+                    log.error("CRITICAL: Compensation FAILED! Manual intervention required for {} to refund {}",
+                            senderLogin, amount, compensationEx);
+                    meterRegistry.counter("bank.transfer.compensation_failed").increment();
+                }
+
+                meterRegistry.counter("bank.transfer.failed", "reason", "deposit_error").increment();
+                throw new FundsTransferException("Ошибка при зачислении. Перевод отменен: " + depositEx.getMessage());
+            }
+
+        } catch (FundsTransferException | InvalidAmount e) {
+            throw e;
+        } catch (Exception withdrawEx) {
+            meterRegistry.counter("bank.transfer.failed", "reason", "withdraw_error").increment();
+            log.error("Withdraw failed for {}: {}", senderLogin, withdrawEx.getMessage(), withdrawEx);
+            throw new FundsTransferException("Ошибка при списании средств: " + withdrawEx.getMessage());
         }
     }
 
@@ -66,7 +86,6 @@ public class TransferServiceImpl implements TransferService {
                 return username;
             }
         }
-
         throw new IllegalStateException("Не удалось определить логин текущего пользователя");
     }
 }

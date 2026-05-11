@@ -29,6 +29,8 @@ spec:
               valueFrom: { configMapKeyRef: { name: cash-config, key: ACCOUNT_SERVICE_PATH } }
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka-broker-0.kafka-headless.default.svc.cluster.local:9092"
+            - name: APP_SECURITY_ENABLED
+              value: "true"
             - name: KEYCLOAK_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
