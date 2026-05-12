@@ -1,12 +1,12 @@
 package com.b0cka.controller;
 
-import com.b0cka.dto.AccountBalanceOperationRequest;
+import com.b0cka.common.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
 import com.b0cka.dto.UpdateAccountDto;
 import com.b0cka.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +16,7 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/accounts")
+@Slf4j
 public class AccountController {
 
     private final AccountService accountService;
@@ -35,14 +36,14 @@ public class AccountController {
         return accountService.getOtherAccounts();
     }
 
-    @Transactional
+
     @PostMapping("/internal/deposit")
     public void deposit(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 
         accountService.deposit(accountBalanceOperationRequest);
     }
 
-    @Transactional
+
     @PostMapping("/internal/withdraw")
     public void withdraw(@RequestBody AccountBalanceOperationRequest accountBalanceOperationRequest) {
 

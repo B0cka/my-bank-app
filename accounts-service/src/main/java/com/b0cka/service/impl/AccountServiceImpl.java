@@ -1,118 +1,140 @@
 package com.b0cka.service.impl;
 
-import com.B0cka.events.ProfileUpdatedEvent;
 import com.b0cka.component.AccountMapper;
-import com.b0cka.dto.AccountBalanceOperationRequest;
+import com.b0cka.common.dto.AccountBalanceOperationRequest;
 import com.b0cka.dto.AccountDto;
 import com.b0cka.dto.UpdateAccountDto;
 import com.b0cka.entity.Account;
-import com.b0cka.ex.InvalidLoginException;
 import com.b0cka.ex.NotEnoughException;
 import com.b0cka.ex.NotFoundException;
 import com.b0cka.ex.YoungUserException;
-import com.b0cka.kafka.producer.NotificationClientProducer;
 import com.b0cka.repository.AccountRepository;
 import com.b0cka.service.AccountService;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
-    private final NotificationClientProducer notificationClientProducer;
+    private final MeterRegistry meterRegistry;
 
     @Override
     public List<AccountDto> getOtherAccounts() {
         String currentLogin = currentUser();
+        log.info("Fetching other accounts for user: {}", currentLogin);
 
-        return accountRepository.findAll().stream()
+        List<AccountDto> others = accountRepository.findAll().stream()
                 .filter(account -> !account.getLogin().equals(currentLogin))
                 .map(AccountMapper::toDto)
                 .toList();
+
+        log.debug("Found {} other accounts for user: {}", others.size(), currentLogin);
+        return others;
     }
 
     @Override
     public AccountDto updateCurrentAccount(UpdateAccountDto updateAccountDto) {
+        String currentLogin = currentUser();
+        log.info("Updating account for user: {}, dto: {}", currentLogin, updateAccountDto);
 
-        if ((ChronoUnit.YEARS.between(updateAccountDto.getBirthday(), LocalDate.now()) < 18)) {
+        if (ChronoUnit.YEARS.between(updateAccountDto.getBirthday(), LocalDate.now()) < 18) {
+            log.warn("Registration attempt for underage user: {}", currentLogin);
             throw new YoungUserException("Возраст юзера не соответствует требованиям банка");
         }
 
-        Account account = accountRepository.findByLogin(currentUser()).orElseGet(() ->
-                Account.builder()
-                        .name("Client" + (Math.random() * 900000) + 100000)
-                        .login(currentUser())
-                        .balance(0L)
-                        .birthday(LocalDate.of(2000, 12, 1))
-                        .build());
+        Account account = accountRepository.findByLogin(currentLogin).orElseGet(() -> {
+            log.info("Creating new account for user: {}", currentLogin);
+            return Account.builder()
+                    .name("Client" + (Math.random() * 900000) + 100000)
+                    .login(currentLogin)
+                    .balance(0L)
+                    .birthday(LocalDate.of(2000, 12, 1))
+                    .build();
+        });
 
         account.setName(updateAccountDto.getName());
         account.setBirthday(updateAccountDto.getBirthday());
-
         accountRepository.save(account);
 
-        notificationClientProducer.sendToNotificationService(
-                new ProfileUpdatedEvent(
-                        UUID.randomUUID().toString(),
-                        currentUser(),
-                        updateAccountDto.getName(),
-                        updateAccountDto.getBirthday(),
-                        LocalDateTime.now()
-                )
-        );
-
+        log.info("Successfully updated account for user: {}, accountId: {}", currentLogin, account.getId());
         return AccountMapper.toDto(account);
     }
 
     @Override
     public AccountDto getCurrentAccount() {
-        Account account = accountRepository.findByLogin(currentUser())
-                .orElseGet(() ->
-                        accountRepository.save(Account.builder()
-                                .name("Client" + (Math.random() * 900000) + 100000)
-                                .login(currentUser())
-                                .balance(0L)
-                                .birthday(LocalDate.of(2000, 12, 1))
-                                .build()));
+        String currentLogin = currentUser();
+        log.debug("Fetching current account for user: {}", currentLogin);
 
+        Account account = accountRepository.findByLogin(currentLogin)
+                .orElseGet(() -> {
+                    log.info("Account not found for user: {}, creating new one", currentLogin);
+                    return accountRepository.save(Account.builder()
+                            .name("Client" + (Math.random() * 900000) + 100000)
+                            .login(currentLogin)
+                            .balance(0L)
+                            .birthday(LocalDate.of(2000, 12, 1))
+                            .build());
+                });
+
+        log.debug("Returning account details for user: {}", currentLogin);
         return AccountMapper.toDto(account);
     }
 
     @Override
-    public void deposit(AccountBalanceOperationRequest accountBalanceOperationRequest) {
+    @Transactional
+    public void deposit(AccountBalanceOperationRequest request) {
+        String login = request.getLogin();
+        long amount = request.getAmount();
+        log.info("Deposit request for user: {}, amount: {}", login, amount);
 
-        Account account = accountRepository.findByLogin(accountBalanceOperationRequest.getLogin()).orElseThrow(
-                () -> new NotFoundException("Аккаунт не найден")
-        );
+        Account account = accountRepository.findByLogin(login).orElseThrow(() -> {
+            log.error("Deposit failed: account not found for login: {}", login);
+            return new NotFoundException("Аккаунт не найден");
+        });
 
-        account.setBalance(account.getBalance() + accountBalanceOperationRequest.getAmount());
+        account.setBalance(account.getBalance() + amount);
         accountRepository.save(account);
 
+        log.info("Successfully deposited {} to account of user: {}, new balance: {}", amount, login, account.getBalance());
     }
 
     @Override
-    public void withdraw(AccountBalanceOperationRequest accountBalanceOperationRequest) {
-        Account account = accountRepository.findByLogin(accountBalanceOperationRequest.getLogin()).orElseThrow(
-                () -> new NotFoundException("Аккаунт не найден")
-        );
-        if(account.getBalance() < accountBalanceOperationRequest.getAmount()){
+    @Transactional
+    public void withdraw(AccountBalanceOperationRequest request) {
+        String login = request.getLogin();
+        long amount = request.getAmount();
+        log.info("Withdrawal request for user: {}, amount: {}", login, amount);
+
+        Account account = accountRepository.findByLogin(login).orElseThrow(() -> {
+            log.error("Withdrawal failed: account not found for login: {}", login);
+            return new NotFoundException("Аккаунт не найден");
+        });
+
+        if (account.getBalance() < amount) {
+            log.warn("Withdrawal rejected: insufficient funds for user: {}, requested: {}, available: {}",
+                    login, amount, account.getBalance());
+            meterRegistry.counter("bank.withdrawal.failed", "reason", "insufficient_funds").increment();
             throw new NotEnoughException("Недостаточно средств на счету");
         }
-        account.setBalance(account.getBalance() - accountBalanceOperationRequest.getAmount());
+
+        account.setBalance(account.getBalance() - amount);
         accountRepository.save(account);
 
+        log.info("Successfully withdrew {} from account of user: {}, new balance: {}", amount, login, account.getBalance());
     }
 
     private String currentUser() {
@@ -124,8 +146,6 @@ public class AccountServiceImpl implements AccountService {
                 return username;
             }
         }
-
         return authentication.getName();
     }
-
 }

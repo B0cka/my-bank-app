@@ -3,5 +3,8 @@ kind: ConfigMap
 metadata:
   name: notifications-config
 data:
-  # Адрес для Keycloak, который работает снаружи Docker Desktop
   APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"
+
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://host.docker.internal:9411/api/v2/spans"
+
+  LOGSTASH_HOST: "host.docker.internal"

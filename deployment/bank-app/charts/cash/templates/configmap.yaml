@@ -7,3 +7,7 @@ data:
   KEYCLOAK_CLIENT_ID: "cash-id"
   APP_SECURITY_OAUTH2_ISSUER_URI: "http://host.docker.internal:8181/realms/bank-realm"
   ACCOUNT_SERVICE_PATH: "http://accounts-service:8090"
+
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://host.docker.internal:9411/api/v2/spans"
+
+  LOGSTASH_HOST: "host.docker.internal"

@@ -31,6 +31,7 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: SPRING_PROFILES_ACTIVE
               value: "db-migration"
+
       containers:
         - name: accounts-service
           image: "{{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}"
@@ -48,6 +49,16 @@ spec:
                 configMapKeyRef:
                   name: accounts-config
                   key: APP_SECURITY_OAUTH2_ISSUER_URI
+            - name: LOGSTASH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: accounts-config
+                  key: LOGSTASH_HOST
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: accounts-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

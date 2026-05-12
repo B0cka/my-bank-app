@@ -29,11 +29,23 @@ spec:
               valueFrom: { configMapKeyRef: { name: cash-config, key: ACCOUNT_SERVICE_PATH } }
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka-broker-0.kafka-headless.default.svc.cluster.local:9092"
+            - name: APP_SECURITY_ENABLED
+              value: "true"
             - name: KEYCLOAK_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: cash-secret
                   key: KEYCLOAK_CLIENT_SECRET
+            - name: LOGSTASH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cash-config
+                  key: LOGSTASH_HOST
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: cash-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

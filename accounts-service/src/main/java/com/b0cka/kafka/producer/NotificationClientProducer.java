@@ -1,6 +1,6 @@
 package com.b0cka.kafka.producer;
 
-import com.B0cka.events.ProfileUpdatedEvent;
+import com.b0cka.events.ProfileUpdatedEvent;
 
 public interface NotificationClientProducer {
 

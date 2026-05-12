@@ -1,6 +1,7 @@
 package com.b0cka.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ public class UpdateAccountDto {
 
     @NotBlank
     private String name;
-    @NotBlank
+    @NotNull
     private LocalDate birthday;
 
 }

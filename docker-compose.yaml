@@ -1,6 +1,113 @@
 version: '3.8'
 
 services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+    networks:
+      - bank-network
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 2181 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - bank-network
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ports: [ "9200:9200" ]
+    volumes: [ "es_data:/usr/share/elasticsearch/data" ]
+    networks:
+      - bank-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    ports: [ "5044:5044" ]
+    volumes: [ "./logstash/pipeline:/usr/share/logstash/pipeline" ]
+    depends_on: [ "elasticsearch" ]
+    networks:
+      - bank-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - xpack.security.enabled=false
+    ports: [ "5601:5601" ]
+    depends_on: [ "elasticsearch" ]
+    networks:
+      - bank-network
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - bank-network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - bank-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - bank-network
+
   postgres:
     image: postgres:16
     container_name: postgres
@@ -15,14 +122,20 @@ services:
     networks:
       - bank-network
 
-
+# ------------ сервисы -------------------- :)
   accounts-service:
     build: ./accounts-service
-    image: my-bank-app-accounts-service:v4
+    image: my-bank-app-accounts-service:v9
     container_name: accounts-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      LOGSTASH_HOST: logstash
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank
+      SPRING_DATASOURCE_USERNAME: bank
+      SPRING_DATASOURCE_PASSWORD: bank
+      APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-realm
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     ports:
       - "8090:8090"
     depends_on:
@@ -33,10 +146,19 @@ services:
 
   cash-service:
     build: ./cash-service
-    image: my-bank-app-cash-service:v4
+    image: my-bank-app-cash-service:v10
     container_name: cash-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      LOGSTASH_HOST: logstash
+      APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-realm
+      KEYCLOAK_CLIENT_ID: cash-id
+      KEYCLOAK_CLIENT_SECRET: GbMK0I9cl5t89lod3Xf47ikldUotRspQ
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_PATH: http://zipkin:9411/api/v2/spans
+      ACCOUNT_SERVICE_PATH: http://accounts-service:8090
+      APP_SECURITY_ENABLED: true
+
     ports:
       - "8900:8900"
     depends_on:
@@ -47,10 +169,18 @@ services:
 
   transfer-service:
     build: ./transfer-service
-    image: my-bank-app-transfer-service:v4
+    image: my-bank-app-transfer-service:v10
     container_name: transfer-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      LOGSTASH_HOST: logstash
+      APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-realm
+      KEYCLOAK_CLIENT_ID: transfer-id
+      KEYCLOAK_CLIENT_SECRET: 47pOpBWwsoNL8wP6O5XftmBTwH5flif8
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_PATH: http://zipkin:9411/api/v2/spans
+      ACCOUNT_SERVICE_PATH: http://accounts-service:8090
+      APP_SECURITY_ENABLED: true
     ports:
       - "9800:9800"
     depends_on:
@@ -61,10 +191,15 @@ services:
 
   notifications-service:
     build: ./notifications-service
-    image: my-bank-app-notifications-service:v5
+    image: my-bank-app-notifications-service:v13
     container_name: notifications-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      LOGSTASH_HOST: logstash
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-realm
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      APP_SECURITY_ENABLED: false
     ports:
       - "9900:9900"
     depends_on:
@@ -88,10 +223,13 @@ services:
 
   api-gateway:
     build: ./api-gateway
-    image: my-bank-app-api-gateway:v4
+    image: my-bank-app-api-gateway:v7
     container_name: api-gateway
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      LOGSTASH_HOST: logstash
+      APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-re
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     ports:
       - "8700:8700"
     depends_on:
@@ -102,13 +240,15 @@ services:
     networks:
       - bank-network
 
-
   front-ui:
     build: ./front-ui
     image: my-bank-app-front-ui:latest
     container_name: front-ui
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      LOGSTASH_HOST: logstash
+      APP_SECURITY_OAUTH2_ISSUER_URI: http://keycloak:8080/realms/bank-realm
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     ports:
       - "8180:8180"
     depends_on:
@@ -122,6 +262,7 @@ networks:
     driver: bridge
 
 volumes:
+  es_data:
   postgres_data:
   zookeeper-data:
   zookeeper-log:
